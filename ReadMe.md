@@ -11,6 +11,31 @@
   
 ![Reports](img/reports.png)
 
+## Certificate
+
+In order to complete the below step for App Registration you will require a certificate. A certificate from a certificate authority is recomended but if you do not have a certificate signed by a certificate authority you can create a self signed certificate as described below. More information regarding certificates can be found on the [Microsoft Site](https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate)
+
+
+## App Registration
+
+To Authenticate with your tenant an Azure AD App Registration is required, follow the belwo steps to enable App Registration for your tenant:
+
+***Please Note:*** App Registration requires Application permissions for User.Read.All
+
+- Navigate to [Azure Active Directory](https://aad.portal.azure.com/)
+- From the portal Select Azure Active Directory and then select App registration
+  ![App Registration](img/app-reg.png)
+- Select New registration. On the Register an application page, set the values as follows
+  - Add a name
+  - Set Supported account types to Accounts in this organizational directory only.
+  - Leave Redirect URI blank.
+- Click on Register
+- Select API Permissions under Manage. Choose Add a permission.
+- Select Microsoft Graph, then Application Permissions. Add User.Read.All and Group.Read.All, then select Add permissions.
+- In the Configured permissions, remove the delegated User.Read permission under Microsoft Graph by selecting the ... to the right of the permission and selecting Remove permission. Select Yes, remove to confirm.
+- Select the Grant admin consent for... button, then select Yes to grant admin consent for the configured application permissions. The Status column in the Configured permissions table changes to Granted for ....
+- Select Certificates & secrets under Manage. Select the Upload certificate button. Browse to your certificate's public key file and select Add.
+
 ## Install the Microsoft Graph PowerShell SDK
 
 For updated information, review the [official documentation](https://learn.microsoft.com/en-us/powershell/microsoftgraph/installation)
@@ -19,5 +44,17 @@ Run the below comand as an admin user:
 
 ``` PowerShell
 Install-Module Microsoft.Graph -Scope AllUsers
+```
+
+To verify the modules were installed run:
+
+```PowerShell
+Get-InstalledModule Microsoft.Graph
+```
+
+Run the below command to validate the installation:
+
+```PowerShell
+Get-InstalledModule Microsoft.Graph
 ```
 
