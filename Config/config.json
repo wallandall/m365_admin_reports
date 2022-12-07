@@ -1,8 +1,8 @@
 {
     "Tenant": {
-        "AppId": "8b526033-b971-4332-9236-58c827bb0905",
-        "TenantId": "30682b55-8271-4354-a7ac-dfdd6ac173f3"
-
+        "AppId": "2dc2afef-8d69-4381-ba99-b2132d227b95",
+        "TenantId": "30682b55-8271-4354-a7ac-dfdd6ac173f3",
+        "CertificateThumbprint" : "5C895E0C6CB08FBE8F27E2203981A619A5ED9B60"
         
     }
 }

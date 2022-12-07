@@ -13,7 +13,11 @@
 
 ## Certificate
 
-In order to complete the below step for App Registration you will require a certificate. A certificate from a certificate authority is recomended but if you do not have a certificate signed by a certificate authority you can create a self signed certificate as described below. More information regarding certificates can be found on the [Microsoft Site](https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate)
+In order to complete the below step for App Registration you will require a certificate. A certificate from a certificate authority is recomended but if you do not have a certificate signed by a certificate authority you can create a self signed certificate as described below. 
+
+- From the project directory exicute the PowerShell script called self_signed.ps1 , this will generate a self signed certificate.
+
+For more information regarding certificates, view the official documentation on the [Microsoft Site](https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate)
 
 
 ## App Registration
@@ -30,11 +34,14 @@ To Authenticate with your tenant an Azure AD App Registration is required, follo
   - Set Supported account types to Accounts in this organizational directory only.
   - Leave Redirect URI blank.
 - Click on Register
+- Once the app has been registered, save the ApplicationId and TenantId to the respective fields of the [config.json file](Config/config.json)
 - Select API Permissions under Manage. Choose Add a permission.
-- Select Microsoft Graph, then Application Permissions. Add User.Read.All and Group.Read.All, then select Add permissions.
+- Select Microsoft Graph, then Application Permissions. Add User.Read.All and Group.Read.All and Directory.Read.All, then select Add permissions.
 - In the Configured permissions, remove the delegated User.Read permission under Microsoft Graph by selecting the ... to the right of the permission and selecting Remove permission. Select Yes, remove to confirm.
 - Select the Grant admin consent for... button, then select Yes to grant admin consent for the configured application permissions. The Status column in the Configured permissions table changes to Granted for ....
 - Select Certificates & secrets under Manage. Select the Upload certificate button. Browse to your certificate's public key file and select Add.
+  - Copy the certificate Thumbprint and save it to the [config.jsone file](Config/config.json)
+  - ***Please Note***: The certificate will have an experation date, if the certificate expires an new certificate will be required
 
 ## Install the Microsoft Graph PowerShell SDK
 
