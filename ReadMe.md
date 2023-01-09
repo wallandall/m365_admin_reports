@@ -27,7 +27,7 @@ For more information regarding certificates, view the official documentation on 
 
 To Authenticate with your tenant an Azure AD App Registration is required, follow the belwo steps to enable App Registration for your tenant:
 
-***Please Note:*** App Registration requires Application permissions for User.Read.All, Group.Read.All, Directory.Read.All and Reports.Read.All
+***Please Note:*** App Registration requires Application permissions for User.Read.All, Group.Read.All, Directory.Read.All,  Reports.Read.All and AuditLog.Read.All
 
 - Navigate to [Azure Active Directory](https://aad.portal.azure.com/)
 - From the portal Select Azure Active Directory and then select App registration
@@ -120,7 +120,8 @@ To execut the script navigate to the folder where the script is stored and run t
 │  ├─ getYammerActivityUserDetail.csv
 │  ├─ getOffice365GroupsActivityDetail.csv
 │  ├─ getOffice365ActiveUserDetail.csv
-│  └─ getTeamsUserActivityUserDetail.csv
+│  ├─ getTeamsUserActivityUserDetail.csv
+│  └─ unusedlicense.csv
 ├─ MSGraphCert.cer
 ├─ self_signed.ps1
 └─ usage_report.ps1

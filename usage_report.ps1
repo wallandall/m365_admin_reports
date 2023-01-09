@@ -106,6 +106,108 @@ Function Get-GraphReports {
     }
 }
 
+Function Get-LoginLogs {
+    [cmdletbinding()]
+    param(
+       [parameter(Mandatory = $true)][string]$CSVPath
+    )   
+
+    $Applications = "Power BI Premium",
+    "Microsoft Planner",
+    "Office Sway", 
+    "Microsoft To-Do",
+    "Microsoft Stream",
+    "Microsoft Forms",
+    "Microsoft Cloud App Security",
+    "Project Online",
+    "Dynamics CRM Online",
+    "Azure Advanced Threat Protection",
+    "Microsoft Flow"
+    $PastDays = 90
+    $today = Get-Date -Format "yyyy-MM-dd"
+    $PastPeriod = ("{0:s}" -f (get-date).AddDays( - ($PastDays))).Split("T")[0]
+    
+
+    foreach ($app in $Applications) {
+        Try {
+                $filter = "createdDateTime ge " + $PastPeriod + "T00:00:00Z and createdDateTime le " + $today + "T00:00:00Z and (appId eq '" + $app + "' or startswith(appDisplayName,'" + $app + "'))"        
+                $reportname = "Audit-" + $app        
+                Write-host -ForegroundColor green "- $reportname ..." 
+                $myReport = Get-MgAuditLogSignIn -Filter $filter
+               
+               if($myReport){
+                $myReport | ConvertTo-Csv -NoTypeInformation | Add-Content "$CSVPath\$reportname.csv"
+               }
+               else {
+                    $myReport ='"id","createdDateTime","userDisplayName","userPrincipalName","userId","appId","appDisplayName","ipAddress","clientAppUsed","correlationId","conditionalAccessStatus","originalRequestId","isInteractive","tokenIssuerName","tokenIssuerType","processingTimeInMilliseconds","riskDetail","riskLevelAggregated","riskLevelDuringSignIn","riskState","riskEventTypes","resourceDisplayName","resourceId","authenticationMethodsUsed","mfaDetail","status","deviceDetail","location","appliedConditionalAccessPolicies","authenticationProcessingDetails","networkLocationDetails"'
+                    $myReport | Add-Content "$CSVPath\$reportname.csv"
+               }     
+        }
+        Catch{
+            Write-Host -ForegroundColor red "Error generating reports"
+            Write-Host -ForegroundColor red $_.Exception.Message
+        }
+    }
+}
+
+
+Function Get-All-Users{
+    [cmdletbinding()]
+    param(
+       [parameter(Mandatory = $true)][string]$CSVPath
+    )  
+
+    try {
+        
+        Get-MgUser -All | Export-Csv -Path $CSVPath\"AllUser.csv" -NoTypeInformation    
+        #Get-AzureADUser -All:$true | Export-Csv -Path $OutPutPath"\AllUser.csv" -NoTypeInformation
+    }
+    catch {
+        Write-Host -ForegroundColor red "Error generating reports"
+        Write-Host -ForegroundColor red $_.Exception.Message
+    }
+}
+
+
+function Get-AssignedPlans{
+    [cmdletbinding()]
+    param(
+        [parameter(Mandatory = $true)][string]$CSVPath
+    )
+    $reportname = "\assignedPlans"
+    $Path = $CSVPath + $reportname + ".csv"
+ 
+    $props = @(
+      'AssignedLicenses', 'UserPrincipalName'
+   )
+
+   $mgUsers = Get-MgUser -Filter 'assignedLicenses/$count ne 0' -ConsistencyLevel eventual -CountVariable licensedUserCount -All -Property $props | Select-Object $props
+
+   # Get the SKUs
+   $skus = Get-MgSubscribedSku
+
+   # Build a hashtable for faster lookups
+   $skuHt = @{}
+   foreach ($sku in $skus) {
+     $skuHt[$sku.SkuId] = $sku
+   }
+
+   $userOutput = foreach ($user in $mgUsers) {
+
+     # Resolve the ID to license name
+     $licenses = foreach($license in $user.AssignedLicenses) {
+          $skuHt[$license.SkuId].SkuPartNumber
+    }
+
+    $user | Add-Member -MemberType NoteProperty -Name Licenses -Value ($licenses -join ',')
+    $user | Select-Object -Property 'Licenses', 'UserPrincipalName'
+    
+   }
+  
+   $userOutput | Export-Csv -Path $Path -NoTypeInformation
+
+} 
+
 ###### End Functions  #############################
 
 #Config file path
@@ -135,6 +237,7 @@ Get-ChildItem -Path $OutPutPath -Filter *.txt | Remove-Item
 Write-Log -Message 'Checking for required modules '
 $graph_version = Get-InstalledModule Microsoft.Graph
 if ($graph_version) {
+    Import-Module Microsoft.Graph.Reports  
     Write-Host -ForegroundColor green '- Microsoft.Graph version:  '$graph_version.Version' is installed'
     Write-Log -Message "Connecting..."
     Connect
@@ -145,16 +248,24 @@ if ($graph_version) {
     
  
     # Get Unlicensed users and save to the output path
-    Write-Log -Message "Generating  Unused Licenses ..."
-    Get-UnusedLicenseReport -CSVPath $OutPutPath -OrgName $OrgName
+    ##Write-Log -Message "Generating  Unused Licenses ..."
+    ##Get-UnusedLicenseReport -CSVPath $OutPutPath -OrgName $OrgName
+    
     #Generate Graph Reports
-    Write-Log -Message "Generating reports"
-    Get-GraphReports -CSVPath $OutPutPath -ReportPeriod "D180"
+    ##Write-Log -Message "Generating reports"
+    ##Get-GraphReports -CSVPath $OutPutPath -ReportPeriod "D180"
 
+    #Generate Audit reports
+    ##Write-Log -Message "Generating audit reports"
+   ## Get-LoginLogs -CSVPath $OutPutPath
 
-    #3 Get-LoginLogs -ClientID $ClientID -redirectUri $redirectUri -tenantId $TenantID
-    #4 Get-AzureADUser -All:$true | Export-Csv -Path $OutPutPath"\AllUser.csv" -NoTypeInformation
-    #5 Get-AssignedPlans -CSVPath $OutPutPath
+    #Export user list
+    ##Write-Log -Message "Generating Azure AD Users"
+    ##Get-All-Users -CSVPath $OutPutPath
+
+    #Generate assigned plans
+    Write-Log -Message "Generating assigned plans"
+    Get-AssignedPlans -CSVPath $OutPutPath
     #6 Get-LicensingGroups -CSVPath $OutPutPath
     #7 Get-LicenseAssignmentPath -CSVPath $OutPutPath
     #8 Get-AdminReport -CSVPath $OutPutPath
