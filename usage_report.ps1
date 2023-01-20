@@ -158,9 +158,106 @@ Function Get-All-Users{
     )  
 
     try {
+
+        $props = @( 'userType', 
+                    'AccountEnabled', 
+                    'AgeGroup',
+                    'AssignedLicenses', 
+                    'AssignedLicenses', 
+                    'UserPrincipalName', 
+                    'city', 
+                    "CompanyName",
+                    "consentProvidedForMinor",
+                    "Country",
+                    "creationType",
+                    "department",
+                    "displayName",
+                    "faxNumber",
+                    "givenName",
+                    "onPremisesImmutableId",
+                    "onPremisesSyncEnabled",
+                    "jobTitle",
+                    "onPremisesLastSyncDateTime",
+                    "legalAgeGroupClassification",
+                    "mail",
+                    "mailNickname",
+                    "mobilePhone",
+                    "otherMails",
+                    "onPremisesSecurityIdentifier",
+                    "passwordPolicies",
+                    "passwordProfile",
+                    "officeLocation",
+                    "postalCode",
+                    "preferredLanguage",
+                    "provisionedPlans",
+                    "proxyAddresses",
+                    "refreshTokensValidFromDateTime",
+                    "showInAddressList",
+                    "imAddresses",
+                    "state",
+                    "streetAddress",
+                    "surname",
+                    "usageLocation",
+                    "state"
+
+                )
         
-        Get-MgUser -All | Export-Csv -Path $CSVPath\"AllUser.csv" -NoTypeInformation    
+       $users =  Get-MgUser -All -Property $props # | Export-Csv -Path $CSVPath\"AllUser.csv" -NoTypeInformation    
         #Get-AzureADUser -All:$true | Export-Csv -Path $OutPutPath"\AllUser.csv" -NoTypeInformation
+        $userObj = foreach($user in $users){
+            [PSCustomObject]@{
+                "ExtensionProperty" = ""
+                "DeletionTimestamp" = ""
+                "ObjectId" = $user.id
+                "ObjectType" = $user.userType
+                "AccountEnabled" = $user.AccountEnabled
+                "AgeGroup" = $user.AgeGroup
+                "AssignedLicenses" = $user.AssignedLicenses
+                "AssignedPlans" = $user.assignedPlans
+                "City" = $user.city
+                "CompanyName" = $user.CompanyName
+                "ConsentProvidedForMinor" = $user.consentProvidedForMinor
+                "Country" = $user.country 
+                "CreationType" = $user.creationType
+                "Department" = $user.department
+                "DirSyncEnabled" = $user.onPremisesSyncEnabled
+                "DisplayName" = $user.displayName
+                "FacsimileTelephoneNumber" = $user.faxNumber 
+                "GivenName" = $user.givenName
+                "IsCompromised" = ""
+                "ImmutableId" = $user.onPremisesImmutableId
+                "JobTitle" = $user.jobTitle 
+                "LastDirSyncTime" = $user.onPremisesLastSyncDateTime
+                "LegalAgeGroupClassification" = $user.legalAgeGroupClassification 
+                "Mail" = $user.mail
+                "MailNickName" = $user.mailNickname
+                "Mobile" = $user.mobilePhone
+                "OnPremisesSecurityIdentifier" = $user.onPremisesSecurityIdentifier 
+                "OtherMails" = $user.otherMails 
+                "PasswordPolicies" = $user.passwordPolicies
+                "PasswordProfile" = $user.passwordProfile
+                "PhysicalDeliveryOfficeName" = $user.officeLocation 
+                "PostalCode" = $user.postalCode 
+                "PreferredLanguage" = $user.preferredLanguage
+                 "ProvisionedPlans" = $user.provisionedPlans
+                "ProvisioningErrors" = ""
+                "ProxyAddresses" = $user.proxyAddresses
+                "RefreshTokensValidFromDateTime" = $user.refreshTokensValidFromDateTime
+                "ShowInAddressList" = $user.showInAddressList
+                "SignInNames" = ""
+                "SipProxyAddress" = $user.imAddresses
+                "State" = $user.state
+                "StreetAddress" = $user.streetAddress
+                "Surname" = $user.surname
+                "TelephoneNumber" = ""
+                "UsageLocation" = $user.usageLocation
+                "UserPrincipalName" = $user.userPrincipalName
+                "UserState" = $user.state
+                "UserStateChangedOn" = $user.externalUserStateChangeDateTime
+                "UserType" = $user.userType
+            }
+        }
+        $userObj | Export-Csv -Path $CSVPath\"AllUser.csv" -NoTypeInformation 
     }
     catch {
         Write-Host -ForegroundColor red "Error generating reports"
@@ -172,7 +269,8 @@ Function Get-All-Users{
 function Get-AssignedPlans{
     [cmdletbinding()]
     param(
-        [parameter(Mandatory = $true)][string]$CSVPath
+        [parameter(Mandatory = $true)][string]$CSVPath,
+        [parameter(Mandatory = $true)][string]$OrgName
     )
     $reportname = "\assignedPlans"
     $Path = $CSVPath + $reportname + ".csv"
@@ -190,8 +288,8 @@ function Get-AssignedPlans{
         $licenses = foreach($license in $user.AssignedLicenses) {
         $skuHt[$license.SkuId].SkuPartNumber
     }
-    $user | Add-Member -MemberType NoteProperty -Name Licenses -Value ($licenses -join ',')
-    $user | Select-Object -Property 'Licenses', 'UserPrincipalName'
+    $user | Add-Member -MemberType NoteProperty -Name licenses -Value ($OrgName+":"+$licenses -join ',')
+    $user | Select-Object -Property 'licenses', 'UserPrincipalName'
    }
    $userOutput | Export-Csv -Path $Path -NoTypeInformation
 } 
@@ -245,7 +343,7 @@ function Get-LicensingGroups{
                     DisplayName = $o.displayName
                     EmailAddress = $o.UserPrincipalName
                     GroupMemberType = "Owner"
-                    isLicensed = "TRUE"
+                    IsLicensed = "TRUE"
                     LastDirSyncTime = ""
                     ObjectId = $o.Id
                     OverallProvisioningStatus = ""
@@ -266,7 +364,7 @@ function Get-LicensingGroups{
                     DisplayName = $user.displayName
                     EmailAddress = $user.UserPrincipalName
                     GroupMemberType = "Member"
-                    isLicensed = "TRUE"
+                    IsLicensed = "TRUE"
                     LastDirSyncTime = ""
                     ObjectId = $member.Id
                     OverallProvisioningStatus = ""
@@ -447,7 +545,7 @@ if ($graph_version) {
 
     #Generate assigned plans
     Write-Log -Message "Generating assigned plans"
-    Get-AssignedPlans -CSVPath $OutPutPath
+    Get-AssignedPlans -CSVPath $OutPutPath -OrgName $OrgName
 
     #Get licensing groups
     Write-Log -Message "Getting Licensing groups"    
