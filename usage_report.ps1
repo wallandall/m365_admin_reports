@@ -489,9 +489,17 @@ Function Get-AdminReport{
 
 
 ###### End Functions  #############################
+if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript")
+ { $ScriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition }
+ else
+ { $ScriptPath = Split-Path -Parent -Path ([Environment]::GetCommandLineArgs()[0]) 
+     if (!$ScriptPath){ $ScriptPath = "." } }
+
+     
 
 #Config file path
-$Configfile = Join-Path $PSScriptRoot -ChildPath "\Config\config.json"
+$Configfile = Join-Path $ScriptPath -ChildPath "\Config\config.json"
+##$Configfile = Join-Path $PSScriptRoot -ChildPath "\Config\config.json"
 
 #Import variables from config file
 $Config = Get-Content $Configfile |ConvertFrom-Json
