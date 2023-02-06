@@ -74,7 +74,8 @@ Function Get-GraphReports {
 
        Write-Host -ForegroundColor green "- getSkypeForBusinessActivityUserDetail.csv..."
        Get-MgReportSkypeForBusinessActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getSkypeForBusinessActivityUserDetail.csv"
-    
+        
+
        Write-Host -ForegroundColor green "- getOneDriveActivityUserDetail.csv..."
        Get-MgReportOneDriveActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getOneDriveActivityUserDetail.csv"
 
@@ -484,22 +485,7 @@ Function Get-AdminReport{
     }
     $report | Select-Object -Property * | Export-Csv -notypeinformation -Path $Path 
 } 
-Function Get-M365BetaResults{
-    param(
-        [parameter(Mandatory = $true)][string]$CSVPath,
-        [parameter(Mandatory = $true)][string]$ReportPeriod
-    )
-    $path = $CSVPath + "\M365AppUserDetails.txt"
 
-    try {
-        Write-Host -ForegroundColor green "- M365AppUserDetails.txt..."
-        Get-MgReportM365AppUserDetail -Period $ReportPeriod -Outfile $path
-    }
-    catch {
-        Write-Host "Could not export M365AppUserDetails.txt "
-        Write-Host $_.Exception.Message
-    }
-}
 
 
 ###### End Functions  #############################
@@ -507,14 +493,13 @@ if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript")
  { $ScriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition }
  else
  { $ScriptPath = Split-Path -Parent -Path ([Environment]::GetCommandLineArgs()[0]) 
-     if (!$ScriptPath){ $ScriptPath = "." } 
-}
+     if (!$ScriptPath){ $ScriptPath = "." } }
 
      
 
 #Config file path
 $Configfile = Join-Path $ScriptPath -ChildPath "\Config\config.json"
-$Configfile = Join-Path $PSScriptRoot -ChildPath "\Config\config.json"
+##$Configfile = Join-Path $PSScriptRoot -ChildPath "\Config\config.json"
 
 #Import variables from config file
 $Config = Get-Content $Configfile |ConvertFrom-Json
@@ -581,9 +566,6 @@ if ($graph_version) {
 
     Write-Log -Message "Getting Admin Report" 
     Get-AdminReport -CSVPath $OutPutPath
-
-    Write-Log -Message "Getting M365 App UserDetails"
-    Get-M365BetaResults -CSVPath $OutPutPath -ReportPeriod "D180"
 
     Write-Log -Message "Disconnecting..."
     Disconnect-MgGraph | out-null
