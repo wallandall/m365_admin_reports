@@ -1,7 +1,0 @@
-{
-    "Tenant": {
-        "AppId": "YOUR_APP_ID",
-        "TenantId": "YOUR_TENANT_ID",
-        "CertificateThumbprint" : "YOUR_CERTIFICATETHUMBPRINT" 
-    }
-}

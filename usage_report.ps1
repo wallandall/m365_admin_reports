@@ -1,3 +1,7 @@
+#Uncomment if you get SSL errors
+#$TLS12Protocol = [System.Net.SecurityProtocolType] 'Ssl3 , Tls12'
+#[System.Net.ServicePointManager]::SecurityProtocol = $TLS12Protocol
+
 function Write-Log
 {
     [CmdletBinding()]
@@ -9,18 +13,6 @@ function Write-Log
 
     $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
     Write-Host "$timestamp - $Message"
-}
-
-function Connect{
-    try {
-        Connect-MgGraph -ClientID $AppID -TenantId $TenantID -CertificateThumbprint $Cert
-    }
-    catch {
-        Write-Host -ForegroundColor red "Could not connect!"
-        Write-Host -ForegroundColor red $_.Exception.Message
-    }
-    
-
 }
 
 Function Get-UnusedLicenseReport{
@@ -60,44 +52,48 @@ Function Get-GraphReports {
     )
     
     try {
+        
+        write-host ""
         Write-Host -ForegroundColor green "- getTeamsUserActivityUserDetail.csv..."
-       Get-MgReportTeamUserActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getTeamsUserActivityUserDetail.csv"
+        Get-MgReportTeamUserActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getTeamsUserActivityUserDetail.csv"
+        Write-Host -ForegroundColor green "- getTeamsUserActivityUserDetail.csv..."
+        Get-MgReportTeamUserActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getTeamsUserActivityUserDetail.csv"
 
-       Write-Host -ForegroundColor green "- getOffice365ActiveUserDetail.csv..."
-       Get-MgReportOffice365ActiveUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365ActiveUserDetail.csv"
+        Write-Host -ForegroundColor green "- getOffice365ActiveUserDetail.csv..."
+        Get-MgReportOffice365ActiveUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365ActiveUserDetail.csv"
 
-       Write-Host -ForegroundColor green "- getOffice365GroupsActivityDetail.csv..."
-       Get-MgReportOffice365GroupActivityDetail -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365GroupsActivityDetail.csv"   
+        Write-Host -ForegroundColor green "- getOffice365GroupsActivityDetail.csv..."
+        Get-MgReportOffice365GroupActivityDetail -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365GroupsActivityDetail.csv"   
        
-       Write-Host -ForegroundColor green "- getYammerActivityUserDetail.csv..."
-       Get-MgReportYammerActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getYammerActivityUserDetail.csv" 
+        Write-Host -ForegroundColor green "- getYammerActivityUserDetail.csv..."
+        Get-MgReportYammerActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getYammerActivityUserDetail.csv" 
 
-       Write-Host -ForegroundColor green "- getSkypeForBusinessActivityUserDetail.csv..."
-       Get-MgReportSkypeForBusinessActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getSkypeForBusinessActivityUserDetail.csv"
+        Write-Host -ForegroundColor green "- getSkypeForBusinessActivityUserDetail.csv..."
+        Get-MgReportSkypeForBusinessActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getSkypeForBusinessActivityUserDetail.csv"
     
-       Write-Host -ForegroundColor green "- getOneDriveActivityUserDetail.csv..."
-       Get-MgReportOneDriveActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getOneDriveActivityUserDetail.csv"
+        Write-Host -ForegroundColor green "- getOneDriveActivityUserDetail.csv..."
+        Get-MgReportOneDriveActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getOneDriveActivityUserDetail.csv"
 
-       Write-Host -ForegroundColor green "- getEmailActivityUserDetail.csv..."
-       Get-MgReportEmailActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getEmailActivityUserDetail.csv"
+        Write-Host -ForegroundColor green "- getEmailActivityUserDetail.csv..."
+        Get-MgReportEmailActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getEmailActivityUserDetail.csv"
 
-       Write-Host -ForegroundColor green "- getOneDriveUsageAccountDetail.csv..."
-       Get-MgReportOneDriveUsageAccountDetail -Period $ReportPeriod -OutFile "$OutPutPath\getOneDriveUsageAccountDetail.csv"
+        Write-Host -ForegroundColor green "- getOneDriveUsageAccountDetail.csv..."
+        Get-MgReportOneDriveUsageAccountDetail -Period $ReportPeriod -OutFile "$OutPutPath\getOneDriveUsageAccountDetail.csv"
 
-       Write-Host -ForegroundColor green "- getSharePointActivityUserDetail.csv..."
-       Get-MgReportSharePointActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getSharePointActivityUserDetail.csv"
+        Write-Host -ForegroundColor green "- getSharePointActivityUserDetail.csv..."
+        Get-MgReportSharePointActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getSharePointActivityUserDetail.csv"
 
-       Write-Host -ForegroundColor green "- getMailboxUsageDetail.csv..."
-       Get-MgReportMailboxUsageDetail -Period $ReportPeriod -OutFile "$OutPutPath\getMailboxUsageDetail.csv"
+        Write-Host -ForegroundColor green "- getMailboxUsageDetail.csv..."
+        Get-MgReportMailboxUsageDetail -Period $ReportPeriod -OutFile "$OutPutPath\getMailboxUsageDetail.csv"
 
-       Write-Host -ForegroundColor green "- getOffice365ActivationsUserCounts.csv..."
-       Get-MgReportOffice365ActiveUserCount -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365ActivationsUserCounts.csv"
+        Write-Host -ForegroundColor green "- getOffice365ActivationsUserCounts.csv..."
+        Get-MgReportOffice365ActiveUserCount -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365ActivationsUserCounts.csv"
 
-       Write-Host -ForegroundColor green "- getOffice365ActivationsUserDetail.csv..."
-       Get-MgReportOffice365ActivationUserDetail  -OutFile "$OutPutPath\getOffice365ActivationsUserDetail.csv"
+        Write-Host -ForegroundColor green "- getOffice365ActivationsUserDetail.csv..."
+        Get-MgReportOffice365ActivationUserDetail  -OutFile "$OutPutPath\getOffice365ActivationsUserDetail.csv"
 
-       Write-Host -ForegroundColor green "- getOffice365ServicesUserCounts.csv..."
-       Get-MgReportOffice365ServiceUserCount -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365ServicesUserCounts.csv"
+        Write-Host -ForegroundColor green "- getOffice365ServicesUserCounts.csv..."
+        Get-MgReportOffice365ServiceUserCount -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365ServicesUserCounts.csv" #>
     }
     catch {
         Write-Host -ForegroundColor red "Error generating reports"
@@ -158,10 +154,10 @@ Function Get-All-Users{
 
     try {
 
-        $props = @( 'userType', 
+        $props = @( 'Id', 
+                    'userType', 
                     'AccountEnabled', 
                     'AgeGroup',
-                    'AssignedLicenses', 
                     'AssignedLicenses', 
                     'UserPrincipalName', 
                     'city', 
@@ -197,17 +193,23 @@ Function Get-All-Users{
                     "streetAddress",
                     "surname",
                     "usageLocation",
-                    "state"
+                    "state", 
+                    "SignInActivity"
 
                 )
         
        $users =  Get-MgUser -All -Property $props # | Export-Csv -Path $CSVPath\"AllUser.csv" -NoTypeInformation    
         #Get-AzureADUser -All:$true | Export-Csv -Path $OutPutPath"\AllUser.csv" -NoTypeInformation
         $userObj = foreach($user in $users){
+            
+            #$usersignindate = Get-MgUser -UserId $user.Id -Select SignInActivity | Select-Object -ExpandProperty SignInActivity
+            	#write-host $user.userPrincipalName 
+              #  write-host  $user.Id
+                #Write-host $user.SignInActivity
             [PSCustomObject]@{
                 "ExtensionProperty" = ""
                 "DeletionTimestamp" = ""
-                "ObjectId" = $user.id
+                "ObjectId" = $user.Id
                 "ObjectType" = $user.userType
                 "AccountEnabled" = $user.AccountEnabled
                 "AgeGroup" = $user.AgeGroup
@@ -254,6 +256,8 @@ Function Get-All-Users{
                 "UserState" = $user.state
                 "UserStateChangedOn" = $user.externalUserStateChangeDateTime
                 "UserType" = $user.userType
+                #"LastSignInDateTime" = $usersignindate.LastSignInDateTime
+           
             }
         }
         $userObj | Export-Csv -Path $CSVPath\"AllUser.csv" -NoTypeInformation 
@@ -353,7 +357,7 @@ function Get-LicensingGroups{
             $allOwners | Select-Object -Property * | Export-Csv $Path -Append -NoTypeInformation
             
             $allUsers =  foreach($member in $members){
-               $user =get-mguser -UserId $member.Id
+               $user =get-mguser -UserId $member.Id  
                [PSCustomObject]@{
                     GroupLicense = $LicenseString
                     GroupName = $groupName
@@ -434,6 +438,7 @@ Function Get-LicenseAssignmentPath{
     $report | Export-Csv $path -Append -NoTypeInformation
 }
 
+
 Function Get-AdminReport{
     [cmdletbinding()]
     param(
@@ -443,7 +448,7 @@ Function Get-AdminReport{
     $path = $CSVPath + $reportname + ".csv"
     $allAdminRole = Get-MgDirectoryRole 
     $props = @('LicenseAssignmentStates','DisplayName', 'UserPrincipalName' )
-    
+    $group_props = @('id', 'DisplayName', 'licenseAssignmentStates', 'assignedLicenses' )
     $skusHash = @{} # An empty hashtable
     ##Get all available SKUs
     Get-MgSubscribedSku | ForEach-Object {
@@ -451,40 +456,68 @@ Function Get-AdminReport{
         $_ | Add-Member -MemberType NoteProperty -Name DisplayName -Value $DisplayName
         $skusHash[$_.SkuId] = $_
     }
-
     $report = foreach($role in $allAdminRole){
-        $roleID = $Role.Id
+        $roleID = $role.Id
         $roleDisplayName = $role.DisplayName       
-        $admins = Get-MgDirectoryRoleMember  -DirectoryRoleId $roleID 
-        foreach ($admin in $admins){
-            
-            $user = Get-MgUser -UserId $admin.id -Property $props
-            $allLicenses = Get-MgUserLicenseDetail -UserId $admin.id -Property SkuPartNumber, ServicePlans
-        
-            $assignedLicenseName = @()
-            $allLicenses | ForEach-Object {
-                $assignedLicenseName += $_.SkuPartNumber+";"                
-            } 
+        $admins = Get-MgDirectoryRoleMember -DirectoryRoleId $roleID 
+                     
 
-            if($assignedLicenseName.Length -gt 0){
-                $isLicensed = $true
-            }
-            else{
-                $isLicensed = $False
-            }
-           
+        foreach ($admin in $admins){
+            $user_id = $admin.Id
+          
+            $admin_user = Get-MgUser -UserId $user_id -Property $props -ea silentlycontinue
+            $service_principal = Get-MgServicePrincipal -ServicePrincipalId $user_id -ea silentlycontinue
+            $admin_group = Get-MgGroup -GroupId $user_id -Property $group_props -ea silentlycontinue
+            if($admin_user){
+                $admin_upn = $admin_user.UserPrincipalName
+                $admin_display_name = $admin_user.DisplayName
+                $type = "User"
+                $allLicenses = Get-MgUserLicenseDetail -UserId $user_id -Property SkuPartNumber, ServicePlans
+                $assignedLicenseName = ""
+                $allLicenses | ForEach-Object {
+                  $assignedLicenseName += "$($_.SkuPartNumber);"                
+                } 
+            
+                if($assignedLicenseName.Length -gt 0){
+                    $isLicensed = $True
+                }
+                else{
+                  $isLicensed = $False
+                }             
+
+              }
+              if($service_principal){
+                #$admin_upn = $service_principal.UserPrincipalName
+                $admin_display_name = $service_principal.DisplayName
+                $type = "ServicePrincipal"
+                $IsLicensed = "$False"
+                $assignedLicenseName=""  
+             
+              }
+              if($admin_group ){
+                #Security groups dont have an email address
+                $admin_upn = ""
+                $admin_display_name = $admin_group.DisplayName
+                $type = "Group"
+                #Groups with role assignment cant be licensed
+                $IsLicensed = "$False"
+                $assignedLicenseName=""     
+                
+              }
             [PSCustomObject]@{
                 Adminrole = $roleDisplayName
                 Licenses = $assignedLicenseName
-                DisplayName = $user.DisplayName
+                DisplayName = $admin_display_name
                 IsLicensed = $isLicensed                
-                UPN = $user.UserPrincipalName
-            } 
-        }
+                UPN = $admin_upn
+                Type = $type        
+             }
+         }
     }
     $report | Select-Object -Property * | Export-Csv -notypeinformation -Path $Path 
 } 
-Function Get-M365BetaResults{
+
+Function Get-M365Results{
     param(
         [parameter(Mandatory = $true)][string]$CSVPath,
         [parameter(Mandatory = $true)][string]$ReportPeriod
@@ -502,7 +535,103 @@ Function Get-M365BetaResults{
 }
 
 
+Function GetLastLogin(){
+    param(
+        [parameter(Mandatory = $true)][string]$CSVPath
+    )
+    $path = $CSVPath + "\User-LastLogin.csv"
+    
+    try {
+        Write-Host -ForegroundColor green "- User-LastLogin.csv..."
+        
+        $users = Get-MgUser  -Property UserPrincipalName
+  
+        $report = foreach ($user in $users){
+ 
+            $upn = $user.UserPrincipalName
+            $lastLogin = Get-MgAuditLogSignIn -Top 1 -Filter "UserPrincipalName eq '$upn'"
+
+
+            [PSCustomObject]@{
+                "UPN" = $upn
+                "Last login" = $lastLogin.createdDateTime
+                "Resource Logged Into" = $lastLogin.resourceDisplayName
+                "Device Name" = $lastLogin.deviceDetail.displayName
+                "Operating System" = $lastLogin.deviceDetail.operatingSystem
+                "Browser" = $lastLogin.deviceDetail.browser
+                "IP Address" = $lastLogin.ipAddress
+                "Country" = $lastLogin.location.countryOrRegion
+                "City" = $lastLogin.location.city
+                "State" = $lastLogin.location.state
+                "isManaged" = $lastLogin.deviceDetail.isManaged
+                "isCompliant" = $lastLogin.deviceDetail.isCompliant
+                "Status Details" = $lastLogin.status.additionalDetails
+                "Status Error" = $lastLogin.status.errorCode
+                "Failure Reason" = $lastLogin.status.failureReason                
+            } 
+        }  
+    } 
+    catch {
+        Write-Host "Could not export report! "
+        Write-Host $_.Exception.Message
+    }
+
+    $report | Select-Object -Property * | Export-Csv -notypeinformation -Path $Path 
+    
+}
+
+
+Function Get-SharedMailboxLicensing{
+    param(
+        [parameter(Mandatory = $true)][string]$CSVPath
+    )
+    $path = $CSVPath + "\SharedMailboxLicensing.csv"
+
+    try {
+        Write-Host -ForegroundColor green "- SharedMailboxLicensing.csv..."
+        
+            $mailbox = Get-Mailbox -ResultSize Unlimited -RecipientTypeDetails SharedMailbox 
+            
+            #Get-MailboxPermission -Identity $x |Format-List -Property *
+            $report = foreach ($mail in $mailbox) {
+                $hasLicense = '' 
+                $upn = $mail.UserPrincipalName               
+                $isLicensedMailbox =   Get-MgUser -UserId $upn -Property "assignedLicenses"                 
+                $mailbox_users = Get-MailboxPermission -Identity $upn 
+                                
+                if($isLicensedMailbox.assignedLicenses){
+                    $hasLicense = "True"
+                }
+                else{
+                    $hasLicense = "False"
+                }
+
+                $members = ""
+                foreach($u in $mailbox_users.User){
+                    if($u -like '*@*' ){
+                        $members =$u + "; " + $members
+                    }
+                }
+
+                [PSCustomObject]@{
+                    "SharedMailBox"= $upn
+                    "IsLicensed"= $hasLicense 
+                    "LitigationHoldEnabled" = $mail.LitigationHoldEnabled
+                    "IssueWarningQuota" = $mail.IssueWarningQuota
+                    "Members" = $members
+                 }                 
+            }  
+    } 
+    catch {
+        Write-Host "Could not export report! "
+        Write-Host $_.Exception.Message
+    }
+
+    $report | Select-Object -Property * | Export-Csv -notypeinformation -Path $Path 
+}
+
 ###### End Functions  #############################
+
 if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript")
  { $ScriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition }
  else
@@ -521,6 +650,8 @@ $Config = Get-Content $Configfile |ConvertFrom-Json
 $AppId = $Config.Tenant.AppId
 $TenantId = $Config.Tenant.TenantId
 $Cert = $Config.Tenant.CertificateThumbprint
+$TenantDnsName =$Config.Tenant.TenantDnsName
+$BasicAuth = $Config.BasicAuth
 
 #Define output path, if the folder does not exisit it will be created
 $OutPutPath = "Output"
@@ -534,62 +665,101 @@ Get-ChildItem -Path $OutPutPath -Filter *.csv | Remove-Item
 Get-ChildItem -Path $OutPutPath -Filter *.txt | Remove-Item
 
 
-
-
 #If the Microsoft Graph module is not installed the script will exit.
 Write-Log -Message 'Checking for required modules '
+
 $graph_version = Get-InstalledModule Microsoft.Graph
-if ($graph_version) {
-    Import-Module Microsoft.Graph.Reports  
-    Write-Host -ForegroundColor green '- Microsoft.Graph version:  '$graph_version.Version' is installed'
-    Write-Log -Message "Connecting..."
-    Connect
+$exchange_online_version = Get-InstalledModule ExchangeOnlineManagement
+
+
+if ($graph_version -And $exchange_online_version ) {
+
+    try{
+      
+      Import-Module -Name Microsoft.Graph.Authentication 
+      Import-Module Microsoft.Graph.Identity.DirectoryManagement
+      #Import-Module Microsoft.Graph.Identity.DirectoryManagement
+      #Import-Module Microsoft.Graph.Identity.DirectoryManagement
+      #Import-Module Microsoft.Graph.Reports
+      Import-Module ExchangeOnlineManagement
+
+      Write-Host -ForegroundColor green '- Microsoft.Graph version:  '$graph_version.Version' is installed'
+      Write-Host -ForegroundColor green '- ExchangeOnlineManagement version:  '$exchange_online_version.Version' is installed'
+      Write-Log -Message "Connecting..."
+  
+      if($BasicAuth -eq "True"){
+        Connect-MgGraph -Scopes "User.Read.All", "Group.ReadWrite.All"
+        Connect-ExchangeOnline
+      }
+      else{
+        Connect-MgGraph -ClientID $AppID -TenantId $TenantID -CertificateThumbprint $Cert
+        Connect-ExchangeOnline -CertificateThumbPrint $Cert -AppID $AppId -Organization $TenantDnsName
+      }
+      #Connect-MgGraph -ClientID $AppID -TenantId $TenantID -CertificateThumbprint $Cert
+      #Connect-MgGraph -Scopes "User.Read.All", "Group.ReadWrite.All"
+
+      #Get the organisation information and store the display name in a variable
+      $Org = Get-MgOrganization
+      $OrgName = $Org.DisplayName
     
-    #Get the organisation information and store the display name in a variable
-    $Org = Get-MgOrganization
-    $OrgName = $Org.DisplayName
+     ## Connect-ExchangeOnline -CertificateThumbPrint $Cert -AppID $AppId -Organization $TenantDnsName
     
- 
-    # Get Unlicensed users and save to the output path
-    Write-Log -Message "Generating  Unused Licenses ..."
-    Get-UnusedLicenseReport -CSVPath $OutPutPath -OrgName $OrgName
+      Write-Host "Organisation Name: "  $OrgName
+      Write-Host "_______________________________________________________________"
+       #Get Unlicensed users and save to the output path
+      Write-Log -Message "Generating  Unused Licenses ..."
+      Get-UnusedLicenseReport -CSVPath $OutPutPath -OrgName $OrgName
     
-    #Generate Graph Reports
-    Write-Log -Message "Generating reports"
-    Get-GraphReports -CSVPath $OutPutPath -ReportPeriod "D180"
+      #Generate Graph Reports
+      Write-Log -Message "Generating reports"
+      Get-GraphReports -CSVPath $OutPutPath -ReportPeriod "D180"
+     
 
-    #Generate Audit reports
-    Write-Log -Message "Generating audit reports"
-    Get-LoginLogs -CSVPath $OutPutPath
+      #Generate Audit reports
+      Write-Log -Message "Generating audit reports"
+      Get-LoginLogs -CSVPath $OutPutPath
 
-    #Export user list
-    Write-Log -Message "Generating Azure AD Users"
-    Get-All-Users -CSVPath $OutPutPath
+      Write-Log -Message "Generating last login reports"
+      GetLastLogin -CSVPath $OutPutPath 
 
-    #Generate assigned plans
-    Write-Log -Message "Generating assigned plans"
-    Get-AssignedPlans -CSVPath $OutPutPath -OrgName $OrgName
+      #Export user list
+      Write-Log -Message "Generating Azure AD Users"
+      Get-All-Users -CSVPath $OutPutPath  
 
-    #Get licensing groups
-    Write-Log -Message "Getting Licensing groups"    
-    Get-LicensingGroups -CSVPath $OutPutPath
+      #Generate assigned plans
+      Write-Log -Message "Generating assigned plans"
+      Get-AssignedPlans -CSVPath $OutPutPath -OrgName $OrgName
+
+      #Get licensing groups
+      Write-Log -Message "Getting Licensing groups"    
+      Get-LicensingGroups -CSVPath $OutPutPath
 
 
-    Write-Log -Message "Getting License Assignment Path" 
-    Get-LicenseAssignmentPath -CSVPath $OutPutPath
+      Write-Log -Message "Getting License Assignment Path" 
+      Get-LicenseAssignmentPath -CSVPath $OutPutPath
 
 
-    Write-Log -Message "Getting Admin Report" 
-    Get-AdminReport -CSVPath $OutPutPath
+      Write-Log -Message "Getting Admin Report" 
+      Get-AdminReport -CSVPath $OutPutPath
 
-    Write-Log -Message "Getting M365 App UserDetails"
-    Get-M365BetaResults -CSVPath $OutPutPath -ReportPeriod "D180"
+      Write-Log -Message "Getting M365 App UserDetails"
+      Get-M365Results -CSVPath $OutPutPath -ReportPeriod "D180"
 
-    Write-Log -Message "Disconnecting..."
-    Disconnect-MgGraph | out-null
+      Write-Log -Message "Getting Shared Mailboxes"
+      Get-SharedMailboxLicensing -CSVPath $OutPutPath
+    
+
+      Write-Log -Message "Disconnecting..."
+      Disconnect-MgGraph | out-null
+      Disconnect-ExchangeOnline -Confirm:$false
+    }
+    catch {
+        Write-Host "Could not connect! "
+        Write-Host $_.Exception.Message
+    }
 }
 else {
-    Write-Log -Message "[ERROR] Unable to Required Module!"
+    Write-Log -Message "[ERROR] Required Modules are not installed!"
     Write-Log -Message "[ERROR] Please review documentation before proceeding!"
     exit
 }

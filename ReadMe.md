@@ -1,6 +1,6 @@
 # M365 Usage Reports
 
-This script uses Microsoft Graph PowerShell to generate M365 usage reports.
+This script uses Microsoft [Graph PowerShell](https://learn.microsoft.com/en-us/powershell/microsoftgraph/get-started) and [Exhange Online PowerShell](https://learn.microsoft.com/en-us/powershell/exchange/exchange-online-powershell) modules to generate M365 usage reports.
 
 ## Display Concealed Information
 
@@ -15,19 +15,27 @@ In order to generate reports the below settings need to be enabled. If you do no
   
 ![Reports](img/reports.png)
 
+## Authentication
+
+Microsoft Graph PowerShell supports two types of authentication, ___Delegated___ and ___App Only___. With ___Delegated Authentication___ you will be prompted to log in with a valid user account and password each time the script is executed. With ___App Only___ auhentication, authentication is validated against an ___Azure App Registration and Certificate___
+
+To enable ___Delegated Authentication___, set ```"BasicAuth":"True"``` in the ___Config/config.json___ file.
+
+___Please Note!___ Delegated Authentication is not the recommended authentication method, however if you use delegated authentication you need to ensure the user has sufficient permissions to execute the scripts.
+
+To use ___App only Authentication___ set ```"BasicAuth":"False"``` in the ___Config/config.json___ file and follow the below steps for the ___Certificate___ and ___App Registration___
+
 ## Certificate
 
-In order to complete the below step for App Registration you will require a certificate. A certificate from a certificate authority is recomended but if you do not have a certificate signed by a certificate authority you can create a self signed certificate as described below.
+In order to complete the below step for App Registration you will require a certificate from a certificate authority or a self signed certificate. If you do not have a certificate signed by a certificate authority you can create a self signed certificate as described below.
 
-- From the project directory exicute the PowerShell script called self_signed.ps1 , this will generate a self signed certificate.
+- From the project directory execute the PowerShell script called self_signed.ps1 , this will generate a self signed certificate.
 
 For more information regarding certificates, view the official documentation on the [Microsoft Site](https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate)
 
 ## App Registration
 
 To Authenticate with your tenant an Azure AD App Registration is required, follow the belwo steps to enable App Registration for your tenant:
-
-***Please Note:*** App Registration requires Application permissions for User.Read.All, Group.Read.All, Directory.Read.All,  Reports.Read.All and AuditLog.Read.All
 
 - Navigate to [Azure Active Directory](https://aad.portal.azure.com/)
 - From the portal Select Azure Active Directory and then select App registration
@@ -37,14 +45,22 @@ To Authenticate with your tenant an Azure AD App Registration is required, follo
   - Set Supported account types to Accounts in this organizational directory only.
   - Leave Redirect URI blank.
 - Click on Register
-- Once the app has been registered, save the ApplicationId and TenantId to the respective fields of the [config.json file](Config/config.json)
-- Select API Permissions under Manage. Choose Add a permission.
-- Select Microsoft Graph, then Application Permissions. Add User.Read.All, Group.Read.All, Directory.Read.All and Reports.Read.All, then select Add permissions.
+- Once the app has been registered, save the ApplicationId and TenantId to the respective fields of the ___config.json___ file
+- Select API Permissions under Manage.
+  - Click Add a permission and select Microsoft Graph, then Application Permissions. Add User.Read.All, Group.Read.All, Directory.Read.All and Reports.Read.All, then select Add permissions.
+  - Click Add a permission and select "APIs My organisation uses" and Search for "Office 365 Exchange Online". Select Application Permissions and add Exchange.ManageAsApp
 - In the Configured permissions, remove the delegated User.Read permission under Microsoft Graph by selecting the ... to the right of the permission and selecting Remove permission. Select Yes, remove to confirm.
 - Select the Grant admin consent for... button, then select Yes to grant admin consent for the configured application permissions. The Status column in the Configured permissions table changes to Granted for ....
 - Select Certificates & secrets under Manage. Select the Upload certificate button. Browse to your certificate's public key file and select Add.
-  - Copy the certificate Thumbprint and save it to the [config.jsone file](Config/config.json)
-  - ***Please Note***: The certificate will have an experation date, if the certificate expires an new certificate will be required
+  - Copy the certificate Thumbprint and save it to the ___config.json___  file  
+  - ___Please Note___: The certificate will have an experation date, if the certificate expires an new certificate will be required
+
+## Assign Azure AD roles to the application
+
+In the Azure AD Portal, under Roles and Administration add the following roles to the App Registration that was created in the previous step:
+
+- Exchange administrator
+- Compliance Administrator
 
 ## Install the Microsoft Graph PowerShell SDK
 
@@ -68,17 +84,27 @@ Run the below command to validate the installation:
 Get-InstalledModule Microsoft.Graph
 ```
 
+## Exchange Online PowerShell
+
+For updated information, review the [official documentation](https://learn.microsoft.com/en-us/powershell/exchange/exchange-online-powershell-v2?view=exchange-ps)
+
+Run the below commands with admin permissions to install Echange PowerShell module.
+
+```Install-Module -Name ExchangeOnlineManagement```
+
 ## Configuration
 
-Script configuration definitions are stored in the [ config.json ](Config/config.json) file in the Config directory. Please ensure your AppId, TenantId and CertificateThumprint are added to the config.json file as per the below exammple
+Script configuration definitions are stored in the ___config.json___ file in the Config directory. Please ensure your AppId, TenantId and CertificateThumprint are added to the config.json file as per the below exammple
 
 ```json
 {
     "Tenant": {
         "AppId": "YOUR_APP_ID",
         "TenantId": "YOUR_TENANT_ID",
-        "CertificateThumbprint" : "YOUR_CERTIFICATETHUMBPRINT" 
-    }
+        "CertificateThumbprint" : "YOUR_CERTIFICATETHUMBPRINT" ,
+        "TenantDnsName":"YOUR_DNS_NAME.onmicrosoft.com"
+    },
+    "BasicAuth":"False"
 }
 ```
 
@@ -96,8 +122,8 @@ To execut the script navigate to the folder where the script is stored and run t
 
 ### Folder Structure
 
-- Config/config.json contains all configuration to run the scrip
-- The above command will create a folder called Output and store all generated reports.
+- `Config/config.json` contains all configuration to run the scrip
+- Executing the script will create a folder called Output and store all generated reports.
 - MSGraphCert.cer is the self signed certificate generated by the script ```self_signed.ps1``` . The certificate is required for authentication.
 - The script ```usage_report.ps1``` is used to generate the required reports.
 
