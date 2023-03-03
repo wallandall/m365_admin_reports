@@ -1,9 +1,0 @@
-{
-    "Tenant": {
-        "AppId": "Your_APP_ID",
-        "TenantId": "YOUR_TENANT_ID",
-        "CertificateThumbprint" : "YOUR_CERTIFICATE",
-        "TenantDnsName":"YOUR_DNS.onmicrosoft.com"
-    },
-    "BasicAuth":"False"
-}
