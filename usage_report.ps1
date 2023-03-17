@@ -54,8 +54,8 @@ Function Get-GraphReports {
     try {
         
         write-host ""
-        Write-Host -ForegroundColor green "- getTeamsUserActivityUserDetail.csv..."
-        Get-MgReportTeamUserActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getTeamsUserActivityUserDetail.csv"
+        ##Write-Host -ForegroundColor green "- getTeamsUserActivityUserDetail.csv..."
+        ##Get-MgReportTeamUserActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getTeamsUserActivityUserDetail.csv"
         Write-Host -ForegroundColor green "- getTeamsUserActivityUserDetail.csv..."
         Get-MgReportTeamUserActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getTeamsUserActivityUserDetail.csv"
 
@@ -86,6 +86,9 @@ Function Get-GraphReports {
         Write-Host -ForegroundColor green "- getMailboxUsageDetail.csv..."
         Get-MgReportMailboxUsageDetail -Period $ReportPeriod -OutFile "$OutPutPath\getMailboxUsageDetail.csv"
 
+        Write-Host -ForegroundColor green "- M365AppUserDetails.csv..."
+        Get-MgReportM365AppUserDetail -Period $ReportPeriod -Outfile "$OutPutPath\getM365AppUserDetail.csv"
+
         Write-Host -ForegroundColor green "- getOffice365ActivationsUserCounts.csv..."
         Get-MgReportOffice365ActiveUserCount -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365ActivationsUserCounts.csv"
 
@@ -93,7 +96,10 @@ Function Get-GraphReports {
         Get-MgReportOffice365ActivationUserDetail  -OutFile "$OutPutPath\getOffice365ActivationsUserDetail.csv"
 
         Write-Host -ForegroundColor green "- getOffice365ServicesUserCounts.csv..."
-        Get-MgReportOffice365ServiceUserCount -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365ServicesUserCounts.csv" #>
+        Get-MgReportOffice365ServiceUserCount -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365ServicesUserCounts.csv" 
+
+        
+        
     }
     catch {
         Write-Host -ForegroundColor red "Error generating reports"
@@ -517,6 +523,7 @@ Function Get-AdminReport{
     $report | Select-Object -Property * | Export-Csv -notypeinformation -Path $Path 
 } 
 
+<#Remove function and add it to Get-GraphReports
 Function Get-M365Results{
     param(
         [parameter(Mandatory = $true)][string]$CSVPath,
@@ -533,6 +540,7 @@ Function Get-M365Results{
         Write-Host $_.Exception.Message
     }
 }
+#>
 
 
 Function GetLastLogin(){
@@ -590,13 +598,16 @@ Function Get-SharedMailboxLicensing{
     try {
         Write-Host -ForegroundColor green "- SharedMailboxLicensing.csv..."
         
-            $mailbox = Get-Mailbox -ResultSize Unlimited -RecipientTypeDetails SharedMailbox 
-            
+            #$mailbox = Get-Mailbox -ResultSize Unlimited -RecipientTypeDetails SharedMailbox 
+            ##get-mailbox -Filter {RecipientTypeDetails -ne 'DiscoveryMailbox'}
+            $mailbox = Get-Mailbox -ResultSize Unlimited -Filter {RecipientTypeDetails -ne 'DiscoveryMailbox'}
             #Get-MailboxPermission -Identity $x |Format-List -Property *
             $report = foreach ($mail in $mailbox) {
+                
+                ##write-host $mail.UserPrincipalName
                 $hasLicense = '' 
                 $upn = $mail.UserPrincipalName               
-                $isLicensedMailbox =   Get-MgUser -UserId $upn -Property "assignedLicenses"                 
+                $isLicensedMailbox =   Get-MgUser -UserId $upn -Property "assignedLicenses" -ea silentlycontinue            
                 $mailbox_users = Get-MailboxPermission -Identity $upn 
                                 
                 if($isLicensedMailbox.assignedLicenses){
@@ -618,6 +629,7 @@ Function Get-SharedMailboxLicensing{
                     "IsLicensed"= $hasLicense 
                     "LitigationHoldEnabled" = $mail.LitigationHoldEnabled
                     "IssueWarningQuota" = $mail.IssueWarningQuota
+                    "RecipientTypeDetails" = $mail.RecipientTypeDetails
                     "Members" = $members
                  }                 
             }  
@@ -714,7 +726,6 @@ if ($graph_version -And $exchange_online_version ) {
       Write-Log -Message "Generating reports"
       Get-GraphReports -CSVPath $OutPutPath -ReportPeriod "D180"
      
-
       #Generate Audit reports
       Write-Log -Message "Generating audit reports"
       Get-LoginLogs -CSVPath $OutPutPath
@@ -743,7 +754,8 @@ if ($graph_version -And $exchange_online_version ) {
       Get-AdminReport -CSVPath $OutPutPath
 
       Write-Log -Message "Getting M365 App UserDetails"
-      Get-M365Results -CSVPath $OutPutPath -ReportPeriod "D180"
+      ##Removed function and added it to Graph Reports
+      ##Get-M365Results -CSVPath $OutPutPath -ReportPeriod "D180"
 
       Write-Log -Message "Getting Shared Mailboxes"
       Get-SharedMailboxLicensing -CSVPath $OutPutPath
