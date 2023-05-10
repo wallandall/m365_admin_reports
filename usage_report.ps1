@@ -1,3 +1,4 @@
+#Version: 08052023
 #Uncomment if you get SSL errors
 #$TLS12Protocol = [System.Net.SecurityProtocolType] 'Ssl3 , Tls12'
 #[System.Net.ServicePointManager]::SecurityProtocol = $TLS12Protocol
@@ -54,14 +55,13 @@ Function Get-GraphReports {
     try {
         
         write-host ""
-        ##Write-Host -ForegroundColor green "- getTeamsUserActivityUserDetail.csv..."
-        ##Get-MgReportTeamUserActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getTeamsUserActivityUserDetail.csv"
+               
         Write-Host -ForegroundColor green "- getTeamsUserActivityUserDetail.csv..."
         Get-MgReportTeamUserActivityUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getTeamsUserActivityUserDetail.csv"
-
+        
         Write-Host -ForegroundColor green "- getOffice365ActiveUserDetail.csv..."
         Get-MgReportOffice365ActiveUserDetail -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365ActiveUserDetail.csv"
-
+       
         Write-Host -ForegroundColor green "- getOffice365GroupsActivityDetail.csv..."
         Get-MgReportOffice365GroupActivityDetail -Period $ReportPeriod -OutFile "$OutPutPath\getOffice365GroupsActivityDetail.csv"   
        
@@ -205,13 +205,9 @@ Function Get-All-Users{
                 )
         
        $users =  Get-MgUser -All -Property $props # | Export-Csv -Path $CSVPath\"AllUser.csv" -NoTypeInformation    
-        #Get-AzureADUser -All:$true | Export-Csv -Path $OutPutPath"\AllUser.csv" -NoTypeInformation
+        
         $userObj = foreach($user in $users){
-            
-            #$usersignindate = Get-MgUser -UserId $user.Id -Select SignInActivity | Select-Object -ExpandProperty SignInActivity
-            	#write-host $user.userPrincipalName 
-              #  write-host  $user.Id
-                #Write-host $user.SignInActivity
+      
             [PSCustomObject]@{
                 "ExtensionProperty" = ""
                 "DeletionTimestamp" = ""
@@ -523,27 +519,8 @@ Function Get-AdminReport{
     $report | Select-Object -Property * | Export-Csv -notypeinformation -Path $Path 
 } 
 
-<#Remove function and add it to Get-GraphReports
-Function Get-M365Results{
-    param(
-        [parameter(Mandatory = $true)][string]$CSVPath,
-        [parameter(Mandatory = $true)][string]$ReportPeriod
-    )
-    $path = $CSVPath + "\M365AppUserDetails.txt"
 
-    try {
-        Write-Host -ForegroundColor green "- M365AppUserDetails.txt..."
-        Get-MgReportM365AppUserDetail -Period $ReportPeriod -Outfile $path
-    }
-    catch {
-        Write-Host "Could not export M365AppUserDetails.txt "
-        Write-Host $_.Exception.Message
-    }
-}
-#>
-
-
-Function GetLastLogin(){
+Function Get-LastLogin(){
     param(
         [parameter(Mandatory = $true)][string]$CSVPath
     )
@@ -551,17 +528,13 @@ Function GetLastLogin(){
     
     try {
         Write-Host -ForegroundColor green "- User-LastLogin.csv..."
+
         
-        $users = Get-MgUser  -Property UserPrincipalName
-  
-        $report = foreach ($user in $users){
- 
-            $upn = $user.UserPrincipalName
-            $lastLogin = Get-MgAuditLogSignIn -Top 1 -Filter "UserPrincipalName eq '$upn'"
+        $lastLogins = Get-MgAuditLogSignIn -All
 
-
-            [PSCustomObject]@{
-                "UPN" = $upn
+        $report = foreach ($lastLogin in $lastLogins){
+        [PSCustomObject]@{
+                "UPN" = $lastLogin.UserPrincipalName
                 "Last login" = $lastLogin.createdDateTime
                 "Resource Logged Into" = $lastLogin.resourceDisplayName
                 "Device Name" = $lastLogin.deviceDetail.displayName
@@ -575,16 +548,16 @@ Function GetLastLogin(){
                 "isCompliant" = $lastLogin.deviceDetail.isCompliant
                 "Status Details" = $lastLogin.status.additionalDetails
                 "Status Error" = $lastLogin.status.errorCode
-                "Failure Reason" = $lastLogin.status.failureReason                
+                "Failure Reason" = $lastLogin.status.failureReason          
             } 
-        }  
+        }          
     } 
     catch {
         Write-Host "Could not export report! "
         Write-Host $_.Exception.Message
     }
 
-    $report | Select-Object -Property * | Export-Csv -notypeinformation -Path $Path 
+    $report | Select-Object -Property * | Export-Csv -notypeinformation -Path $Path  
     
 }
 
@@ -597,14 +570,12 @@ Function Get-SharedMailboxLicensing{
 
     try {
         Write-Host -ForegroundColor green "- SharedMailboxLicensing.csv..."
-        
-            #$mailbox = Get-Mailbox -ResultSize Unlimited -RecipientTypeDetails SharedMailbox 
-            ##get-mailbox -Filter {RecipientTypeDetails -ne 'DiscoveryMailbox'}
+                
             $mailbox = Get-Mailbox -ResultSize Unlimited -Filter {RecipientTypeDetails -ne 'DiscoveryMailbox'}
-            #Get-MailboxPermission -Identity $x |Format-List -Property *
+            
             $report = foreach ($mail in $mailbox) {
                 
-                ##write-host $mail.UserPrincipalName
+               
                 $hasLicense = '' 
                 $upn = $mail.UserPrincipalName               
                 $isLicensedMailbox =   Get-MgUser -UserId $upn -Property "assignedLicenses" -ea silentlycontinue            
@@ -690,9 +661,6 @@ if ($graph_version -And $exchange_online_version ) {
       
       Import-Module -Name Microsoft.Graph.Authentication 
       Import-Module Microsoft.Graph.Identity.DirectoryManagement
-      #Import-Module Microsoft.Graph.Identity.DirectoryManagement
-      #Import-Module Microsoft.Graph.Identity.DirectoryManagement
-      #Import-Module Microsoft.Graph.Reports
       Import-Module ExchangeOnlineManagement
 
       Write-Host -ForegroundColor green '- Microsoft.Graph version:  '$graph_version.Version' is installed'
@@ -704,21 +672,20 @@ if ($graph_version -And $exchange_online_version ) {
         Connect-ExchangeOnline
       }
       else{
-        Connect-MgGraph -ClientID $AppID -TenantId $TenantID -CertificateThumbprint $Cert
+        Connect-MgGraph -ClientID $AppID -TenantId $TenantID -CertificateThumbprint $Cert        
         Connect-ExchangeOnline -CertificateThumbPrint $Cert -AppID $AppId -Organization $TenantDnsName
       }
-      #Connect-MgGraph -ClientID $AppID -TenantId $TenantID -CertificateThumbprint $Cert
-      #Connect-MgGraph -Scopes "User.Read.All", "Group.ReadWrite.All"
+
 
       #Get the organisation information and store the display name in a variable
       $Org = Get-MgOrganization
       $OrgName = $Org.DisplayName
     
-     ## Connect-ExchangeOnline -CertificateThumbPrint $Cert -AppID $AppId -Organization $TenantDnsName
+      Connect-ExchangeOnline -CertificateThumbPrint $Cert -AppID $AppId -Organization $TenantDnsName
     
       Write-Host "Organisation Name: "  $OrgName
       Write-Host "_______________________________________________________________"
-       #Get Unlicensed users and save to the output path
+      #Get Unlicensed users and save to the output path
       Write-Log -Message "Generating  Unused Licenses ..."
       Get-UnusedLicenseReport -CSVPath $OutPutPath -OrgName $OrgName
     
@@ -731,7 +698,7 @@ if ($graph_version -And $exchange_online_version ) {
       Get-LoginLogs -CSVPath $OutPutPath
 
       Write-Log -Message "Generating last login reports"
-      GetLastLogin -CSVPath $OutPutPath 
+      Get-LastLogin -CSVPath $OutPutPath 
 
       #Export user list
       Write-Log -Message "Generating Azure AD Users"
@@ -752,10 +719,6 @@ if ($graph_version -And $exchange_online_version ) {
 
       Write-Log -Message "Getting Admin Report" 
       Get-AdminReport -CSVPath $OutPutPath
-
-      Write-Log -Message "Getting M365 App UserDetails"
-      ##Removed function and added it to Graph Reports
-      ##Get-M365Results -CSVPath $OutPutPath -ReportPeriod "D180"
 
       Write-Log -Message "Getting Shared Mailboxes"
       Get-SharedMailboxLicensing -CSVPath $OutPutPath

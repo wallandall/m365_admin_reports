@@ -47,7 +47,7 @@ To Authenticate with your tenant an Azure AD App Registration is required, follo
 - Click on Register
 - Once the app has been registered, save the ApplicationId and TenantId to the respective fields of the ___config.json___ file
 - Select API Permissions under Manage.
-  - Click Add a permission and select Microsoft Graph, then Application Permissions. Add User.Read.All, Group.Read.All, Directory.Read.All and Reports.Read.All, then select Add permissions.
+  - Click Add a permission and select Microsoft Graph, then Application Permissions. Add User.Read.All, Group.Read.All, Directory.Read.All and Reports.Read.All, AuditLog.Read.All, then select Add permissions.
   - Click Add a permission and select "APIs My organisation uses" and Search for "Office 365 Exchange Online". Select Application Permissions and add Exchange.ManageAsApp
 - In the Configured permissions, remove the delegated User.Read permission under Microsoft Graph by selecting the ... to the right of the permission and selecting Remove permission. Select Yes, remove to confirm.
 - Select the Grant admin consent for... button, then select Yes to grant admin consent for the configured application permissions. The Status column in the Configured permissions table changes to Granted for ....
